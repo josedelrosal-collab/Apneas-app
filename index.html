@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirwayGym Pro - Terapia para Apnea del Sueño</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 25px;
+            background: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .dark-mode .mode-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .mode-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .exercise-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .dark-mode .exercise-container {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .dark-mode .exercise-header {
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+
+        .exercise-title {
+            font-size: 1.8em;
+            color: #667eea;
+        }
+
+        .dark-mode .exercise-title {
+            color: #a5b4fc;
+        }
+
+        .exercise-timer {
+            font-size: 2em;
+            font-weight: bold;
+            color: #764ba2;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .rep-counter {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .rep-counter {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .rep-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .rep-button {
+            padding: 8px 20px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .dark-mode .avatar-container {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.5) 0%, rgba(17, 24, 39, 0.5) 100%);
+        }
+
+        .avatar {
+            width: 250px;
+            height: 350px;
+            position: relative;
+        }
+
+        .avatar-head {
+            width: 90px;
+            height: 110px;
+            background: #fdbcb4;
+            border-radius: 45px 45px 55px 55px;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .avatar-eyes {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .eye {
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .avatar-mouth {
+            position: absolute;
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 20px;
+            border: 3px solid #333;
+            border-radius: 0 0 20px 20px;
+            border-top: none;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-nose {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: #f4a0a0;
+            border-radius: 50%;
+        }
+
+        .avatar-body {
+            width: 140px;
+            height: 180px;
+            background: #667eea;
+            border-radius: 40px 40px 20px 20px;
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .avatar-belly {
+            width: 110px;
+            height: 90px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+
+        .breathing .avatar-belly {
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.25); }
+        }
+
+        .tongue {
+            width: 30px;
+            height: 35px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            z-index: 5;
+        }
+
+        .tongue-exercise .tongue {
+            display: block;
+            animation: tongueMove 2s ease-in-out infinite;
+        }
+
+        @keyframes tongueMove {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .water-glass {
+            width: 70px;
+            height: 90px;
+            background: rgba(100, 200, 255, 0.3);
+            border: 3px solid #64c8ff;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+
+        .lax-vox .water-glass {
+            display: block;
+        }
+
+        .exercise-instructions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .dark-mode .exercise-instructions {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .instruction-step {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .instruction-step::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--success-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .stats-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 30px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dark-mode .stats-panel {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .dark-mode .stat-item {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .controls { flex-direction: column; align-items: center; }
+            .control-btn { width: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Modo Oscuro</button>
+   
+    <div class="container">
+        <div class="header">
+            <h1>🫁 AirwayGym Pro</h1>
+            <p>Terapia Miofuncional Completa para Apnea del Sueño</p>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="selectMode('basic')">🎯 Básico</button>
+            <button class="mode-btn" onclick="selectMode('morning')">☀️ Mañana</button>
+            <button class="mode-btn" onclick="selectMode('night')">🌙 Noche</button>
+            <button class="mode-btn" onclick="selectMode('advanced')">🚀 Avanzado</button>
+        </div>
+
+        <div class="exercise-container">
+            <div class="exercise-header">
+                <h2 class="exercise-title" id="exerciseTitle">Respiración Diafragmática 4-6</h2>
+                <div class="exercise-timer" id="timer">02:00</div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+
+            <div class="rep-counter" id="repCounter" style="display: none;">
+                <span>Repeticiones:</span>
+                <div class="rep-display" id="repDisplay">0 / 10</div>
+                <button class="rep-button" onclick="incrementRep()">+1 Rep</button>
+            </div>
+
+            <div class="avatar-container">
+                <div class="avatar breathing" id="avatar">
+                    <div class="avatar-head">
+                        <div class="avatar-eyes">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                        <div class="avatar-nose"></div>
+                        <div class="avatar-mouth"></div>
+                        <div class="tongue"></div>
+                    </div>
+                    <div class="avatar-body">
+                        <div class="avatar-belly"></div>
+                    </div>
+                    <div class="water-glass"></div>
+                </div>
+            </div>
+
+            <div class="exercise-instructions">
+                <div id="instructions">
+                    <div class="instruction-step">Inhala por la nariz durante 4 segundos</div>
+                    <div class="instruction-step">Exhala con labios fruncidos durante 6 segundos</div>
+                    <div class="instruction-step">Observa cómo se mueve el abdomen</div>
+                    <div class="instruction-step">Mantén el ritmo constante</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="previousExercise()">⬅️ Anterior</button>
+                <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">▶️ Iniciar</button>
+                <button class="control-btn" onclick="nextExercise()">Siguiente ➡️</button>
+                <button class="control-btn" id="soundBtn" onclick="toggleSound()">🔊 Sonido</button>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <h3 style="color: #667eea; margin-bottom: 20px;">📈 Tu Progreso</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span>Sesiones Totales</span>
+                    <span class="stat-value" id="totalSessions">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Tiempo Total</span>
+                    <span class="stat-value" id="totalTime">0 min</span>
+                </div>
+                <div class="stat-item">
+                    <span>Racha Actual</span>
+                    <span class="stat-value" id="currentStreak">0 días</span>
+                </div>
+                <div class="stat-item">
+                    <span>Completados Hoy</span>
+                    <span class="stat-value" id="todayCompleted">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de ejercicios
+        const exercises = {
+            basic: [
+                {
+                    name: "Respiración Diafragmática 4-6",
+                    duration: 120,
+                    animation: "breathing",
+                    hasReps: false,
+                    instructions: [
+                        "Inhala por la nariz durante 4 segundos",
+                        "Exhala con labios fruncidos durante 6 segundos",
+                        "El abdomen debe expandirse al inhalar",
+                        "Mantén hombros relajados"
+                    ]
+                },
+                {
+                    name: "Push-up Lingual",
+                    duration: 90,
+                    animation: "tongue-exercise",
+                    hasReps: true,
+                    reps: 20,
+                    instructions: [
+                        "Presiona toda la lengua contra el paladar",
+                        "Mantén 5 segundos la presión",
+                        "Suelta y descansa 2 segundos",
+                        "20 repeticiones totales"
+                    ]
+                },
+                {
+                    name: "Lax Vox",
+                    duration: 90,
+                    animation: "lax-vox",
+                    hasReps: false,
+                    instructions: [
+                        "Pajita en vaso con agua (3-5 cm sumergida)",
+                        "Sopla haciendo burbujas constantes",
+                        "Emite sonido 'uuuu' mientras soplas",
+                        "Mantén flujo constante"
+                    ]
+                },
+                {
+                    name: "Deglución de Mendelsohn",
+                    duration: 150,
+                    animation: "breathing",
+                    hasReps: true,
+                    reps: 10,
+                    instructions: [
+                        "Traga saliva normalmente",
+                        "Mantén la nuez elevada 2-3 segundos",
+                        "Siente la tensión en la garganta",
+                        "Suelta lentamente"
+                    ]
+                }
+            ],
+            morning: [
+                {
+                    name: "Respiración 4-7-8",
+                    duration: 180,
+                    animation: "breathing",
+                    hasReps: false,
+                    instructions: [
+                        "Inhala por la nariz 4 segundos",
+                        "Mantén el aire 7 segundos",
+                        "Exhala por la boca 8 segundos",
+                        "Activa el sistema parasimpático"
+                    ]
+                },
+                {
+                    name: "Sniff-Hold-Sss",
+                    duration: 240,
+                    animation: "breathing",
+                    hasReps: true,
+                    reps: 20,
+                    instructions: [
+                        "3 olfateos nasales cortos y rápidos",
+                        "Mantén 2 segundos",
+                        "Suelta haciendo 'sss' 6-8 segundos",
+                        "2 series de 10 repeticiones"
+                    ]
+                },
+                {
+                    name: "KA-GA Repetido",
+                    duration: 90,
+                    animation: "breathing",
+                    hasReps: false,
+                    instructions: [
+                        "Pronuncia KA-KA-KA rápidamente",
+                        "Alterna con GA-GA-GA",
+                        "Siente elevación del velo del paladar",
+                        "3 tandas de 30 segundos"
+                    ]
+                },
+                {
+                    name: "Succión Palatina",
+                    duration: 120,
+                    animation: "tongue-exercise",
+                    hasReps: true,
+                    reps: 15,
+                    instructions: [
+                        "Pega la lengua completamente al paladar",
+                        "Crea un vacío succionando",
+                        "Mantén 5-10 segundos",
+                        "15 repeticiones"
+                    ]
+                }
+            ],
+            night: [
+                {
+                    name: "Respiración 4-6 Relajante",
+                    duration: 120,
+                    animation: "breathing",
+                    hasReps: false,
+                    instructions: [
+                        "Respiración lenta y profunda",
+                        "4 segundos inhalar",
+                        "6 segundos exhalar",
+                        "Prepara el cuerpo para dormir"
+                    ]
+                },
+                {
+                    name: "Lax Vox Nocturno",
+                    duration: 110,
+                    animation: "lax-vox",
+                    hasReps: false,
+                    instructions: [
+                        "45 segundos burbujas suaves",
+                        "20 segundos descanso",
+                        "45 segundos con nariz pinzada",
+                        "Relaja la garganta"
+                    ]
+                },
+                {
+                    name: "Gárgaras Terapéuticas",
+                    duration: 90,
+                    animation: "breathing",
+                    hasReps: true,
+                    reps: 3,
+                    instructions: [
+                        "Agua tibia con sal",
+                        "Gárgaras 30 segundos",
+                        "3 repeticiones",
+                        "Relaja músculos faríngeos"
+                    ]
+                }
+            ],
+            advanced: [
+                {
+                    name: "Tongue Hold + Swallow",
+                    duration: 120,
+                    animation: "tongue-exercise",
+                    hasReps: true,
+                    reps: 15,
+                    instructions: [
+                        "Sostén lengua entre dientes frontales",
+                        "Traga manteniendo posición",
+                        "Muy difícil pero efectivo",
+                        "15 repeticiones"
+                    ]
+                },
+                {
+                    name: "Shaker Exercise",
+                    duration: 180,
+                    animation: "breathing",
+                    hasReps: true,
+                    reps: 3,
+                    instructions: [
+                        "Acostado, levanta cabeza mirando dedos de pies",
+                        "Mantén 1 minuto",
+                        "Descansa 1 minuto",
+                        "3 series"
+                    ]
+                },
+                {
+                    name: "IOPI - Presión Lingual",
+                    duration: 150,
+                    animation: "tongue-exercise",
+                    hasReps: true,
+                    reps: 30,
+                    instructions: [
+                        "Presiona lengua contra paladar con máxima fuerza",
+                        "Mantén 3 segundos",
+                        "30 repeticiones",
+                        "Mide progreso con depresor"
+                    ]
+                }
+            ]
+        };
+
+        // Variables globales
+        let currentMode = 'basic';
+        let currentExerciseIndex = 0;
+        let isPlaying = false;
+        let soundEnabled = false;
+        let timer = null;
+        let timeRemaining = 0;
+        let totalTime = 0;
+        let currentReps = 0;
+        let targetReps = 10;
+
+        // Estadísticas
+        let stats = {
+            totalSessions: parseInt(localStorage.getItem('totalSessions') || '0'),
+            totalTime: parseInt(localStorage.getItem('totalTime') || '0'),
+            currentStreak: parseInt(localStorage.getItem('currentStreak') || '0'),
+            todayCompleted: parseInt(localStorage.getItem('todayCompleted') || '0')
+        };
+
+        // Inicialización
+        window.onload = function() {
+            loadExercise(0);
+            updateStatsDisplay();
+        };
+
+        function selectMode(mode) {
+            currentMode = mode;
+            currentExerciseIndex = 0;
+           
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+           
+            stopExercise();
+            loadExercise(0);
+        }
+
+        function loadExercise(index) {
+            const exerciseList = exercises[currentMode];
+            if (!exerciseList || index >= exerciseList.length) return;
+           
+            currentExerciseIndex = index;
+            const exercise = exerciseList[index];
+           
+            document.getElementById('exerciseTitle').textContent =
+                exercise.name + ' (' + (index + 1) + '/' + exerciseList.length + ')';
+           
+            const instructionsHtml = exercise.instructions
+                .map(inst => '<div class="instruction-step">' + inst + '</div>')
+                .join('');
+            document.getElementById('instructions').innerHTML = instructionsHtml;
+           
+            const avatar = document.getElementById('avatar');
+            avatar.className = 'avatar ' + exercise.animation;
+           
+            const repCounter = document.getElementById('repCounter');
+            if (exercise.hasReps) {
+                repCounter.style.display = 'flex';
+                targetReps = exercise.reps || 10;
+                currentReps = 0;
+                updateRepDisplay();
+            } else {
+                repCounter.style.display = 'none';
+            }
+           
+            timeRemaining = exercise.duration;
+            totalTime = exercise.duration;
+            updateTimerDisplay();
+            updateProgressBar();
+           
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️ Iniciar';
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                pauseExercise();
+            } else {
+                startExercise();
+            }
+        }
+
+        function startExercise() {
+            if (timeRemaining <= 0) {
+                const exercise = exercises[currentMode][currentExerciseIndex];
+                timeRemaining = exercise.duration;
+                totalTime = exercise.duration;
+            }
+           
+            isPlaying = true;
+            document.getElementById('playPauseBtn').textContent = '⏸️ Pausar';
+           
+            if (soundEnabled) {
+                playSound(523, 150);
+            }
+           
+            timer = setInterval(function() {
+                timeRemaining--;
+                updateTimerDisplay();
+                updateProgressBar();
+               
+                if (timeRemaining <= 0) {
+                    completeExercise();
+                }
+            }, 1000);
+        }
+
+        function pauseExercise() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️ Continuar';
+            clearInterval(timer);
+        }
+
+        function stopExercise() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️ Iniciar';
+            clearInterval(timer);
+        }
+
+        function completeExercise() {
+            stopExercise();
+           
+            stats.totalSessions++;
+            stats.totalTime += exercises[currentMode][currentExerciseIndex].duration;
+            stats.todayCompleted++;
+            saveStats();
+            updateStatsDisplay();
+           
+            if (soundEnabled) {
+                playSound(784, 300);
+            }
+           
+            setTimeout(function() {
+                if (currentExerciseIndex < exercises[currentMode].length - 1) {
+                    nextExercise();
+                } else {
+                    alert('¡Rutina completada! 🎉');
+                }
+            }, 1000);
+        }
+
+        function nextExercise() {
+            stopExercise();
+            if (currentExerciseIndex < exercises[currentMode].length - 1) {
+                loadExercise(currentExerciseIndex + 1);
+            }
+        }
+
+        function previousExercise() {
+            stopExercise();
+            if (currentExerciseIndex > 0) {
+                loadExercise(currentExerciseIndex - 1);
+            }
+        }
+
+        function incrementRep() {
+            if (currentReps < targetReps) {
+                currentReps++;
+                updateRepDisplay();
+                if (soundEnabled) {
+                    playSound(800, 50);
+                }
+            }
+        }
+
+        function updateRepDisplay() {
+            document.getElementById('repDisplay').textContent = currentReps + ' / ' + targetReps;
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = (minutes < 10 ? '0' : '') + minutes + ':' +
+                           (seconds < 10 ? '0' : '') + seconds;
+            document.getElementById('timer').textContent = display;
+        }
+
+        function updateProgressBar() {
+            const progress = ((totalTime - timeRemaining) / totalTime) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundBtn');
+            btn.textContent = soundEnabled ? '🔊 Sonido' : '🔇 Mudo';
+            if (soundEnabled) {
+                playSound(440, 100);
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.dark-mode-toggle');
+            const isDark = document.body.classList.contains('dark-mode');
+            btn.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        function playSound(frequency, duration) {
+            if (!soundEnabled) return;
+           
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+               
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+               
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+               
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+               
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration / 1000);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function saveStats() {
+            localStorage.setItem('totalSessions', stats.totalSessions);
+            localStorage.setItem('totalTime', stats.totalTime);
+            localStorage.setItem('currentStreak', stats.currentStreak);
+            localStorage.setItem('todayCompleted', stats.todayCompleted);
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('totalSessions').textContent = stats.totalSessions;
+            document.getElementById('totalTime').textContent = Math.round(stats.totalTime / 60) + ' min';
+            document.getElementById('currentStreak').textContent = stats.currentStreak + ' días';
+            document.getElementById('todayCompleted').textContent = stats.todayCompleted;
+        }
+
+        // Cargar preferencia de modo oscuro
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.dark-mode-toggle').textContent = '☀️ Modo Claro';
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'ArrowRight':
+                    nextExercise();
+                    break;
+                case 'ArrowLeft':
+                    previousExercise();
+                    break;
+                case 's':
+                    toggleSound();
+                    break;
+                case 'd':
+                    toggleDarkMode();
+                    break;
+                case 'r':
+                    if (exercises[currentMode][currentExerciseIndex].hasReps) {
+                        incrementRep();
+                    }
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
